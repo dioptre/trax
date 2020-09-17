@@ -425,7 +425,12 @@ class ReversibleSerialTrainer(object):
           std_layer, std_inputs, stack, std_layer.n_out)
       stats.append(std_layer_stats)
 
-    return stats[0]['loss'], stats
+    # Join stats from different optimizers into one.
+    joint_stats = {}
+    for i, stat in enumerate(reversed(stats)):
+      for k, v in stat.items():
+        joint_stats[f'layer{i}/' + k] = v
+    return stats[0]['loss'], joint_stats
 
   def _run_forward_standard(self, stack, layer, accelerated_fn, rng):
     """Run standard layer forward."""
